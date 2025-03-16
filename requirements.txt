@@ -3,3 +3,4 @@ twilio
 transformers
 torch
 gunicorn
+python-dotenv
