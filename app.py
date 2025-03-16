@@ -52,7 +52,6 @@ def webhook():
     resp = MessagingResponse()
     msg = resp.message()
 
-    # Detectar número do vizinho
     vizinho_num = re.search(r"número (\d+)", incoming_msg)
     if not vizinho_num:
         app.logger.warning("Número do vizinho não detectado.")
@@ -62,30 +61,25 @@ def webhook():
     app.logger.info(f"Número do vizinho detectado: {vizinho_id}")
 
     try:
-        # Classificar a reclamação
         prediction = nlp(incoming_msg)[0]
         app.logger.info(f"Predição do modelo: {prediction['label']}")
 
-        if prediction["label"] == "LABEL_0":
-            msg.body("Olá Dona Maria, estaremos entrando em contato com o vizinho, mas não se preocupe, tudo é feito em sigilo para que possamos mediar qualquer tipo de conflito e evitar desentendimentos. Avisaremos você assim que notificarmos.")
-            app.logger.info("Enviando resposta ao reclamante.")
+        # Responder sempre, para teste
+        msg.body("Olá Dona Maria, estaremos entrando em contato com o vizinho, mas não se preocupe, tudo é feito em sigilo para que possamos mediar qualquer tipo de conflito e evitar desentendimentos. Avisaremos você assim que notificarmos.")
+        app.logger.info("Enviando resposta ao reclamante.")
 
-            # Enviar mensagem ao vizinho
-            client.messages.create(
-                body="Olá Fernando, vim te avisar que alguns vizinhos estão reclamando do barulho. Sei que você é uma pessoa respeitosa, por esse motivo acreditamos que pode ser um equívoco, mas ainda assim achei melhor notificar, lembrando sobre as regras do condomínio e venhamos a evitar qualquer desentendimento ou infrações. Tenha uma excelente noite, Sr. Fernando! Há, se tiver realizando algum tipo de trabalho, me informe aqui que eu posso te ajudar, sugerindo alternativas que podem mitigar qualquer desentendimento entre nossos colegas.",
-                from_="whatsapp:+14155238886",
-                to=to_number
-            )
-            app.logger.info(f"Mensagem enviada ao vizinho: {to_number}")
+        client.messages.create(
+            body="Olá Fernando, vim te avisar que alguns vizinhos estão reclamando do barulho...",
+            from_="whatsapp:+14155238886",
+            to=to_number
+        )
+        app.logger.info(f"Mensagem enviada ao vizinho: {to_number}")
     except TwilioRestException as e:
         app.logger.error(f"Erro ao enviar mensagem via Twilio: {e}")
         msg.body("Erro ao enviar mensagem ao vizinho. Tente novamente.")
-    except ValueError as e:
-        app.logger.error(f"Erro no modelo de NLP: {e}")
-        msg.body("Erro ao processar a mensagem. Tente novamente.")
     except Exception as e:
         app.logger.error(f"Erro inesperado: {e}")
-        msg.body("Desculpe, ocorreu um erro ao processar sua mensagem. Tente novamente mais tarde.")
+        msg.body("Desculpe, ocorreu um erro ao processar sua mensagem.")
 
     return str(resp)
 
